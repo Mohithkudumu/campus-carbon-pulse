@@ -1,0 +1,281 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Cyberpunk Dark Theme */
+    --background: 0 0% 13%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 145 100% 45%;
+    --primary-foreground: 0 0% 5%;
+
+    --secondary: 51 100% 50%;
+    --secondary-foreground: 0 0% 5%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 351 100% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 351 100% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 145 100% 45%;
+
+    --radius: 0.75rem;
+
+    /* Custom Cyberpunk Colors */
+    --carbon-low: 145 100% 45%;
+    --carbon-mid: 51 100% 50%;
+    --carbon-critical: 351 100% 55%;
+
+    /* Glassmorphism */
+    --glass-bg: 0 0% 8%;
+    --glass-border: 0 0% 100%;
+
+    /* Gradients */
+    --gradient-cyber: linear-gradient(90deg, hsl(var(--carbon-low)), hsl(var(--carbon-mid)));
+    --gradient-heat: linear-gradient(90deg, hsl(var(--carbon-low)), hsl(var(--carbon-mid)), hsl(var(--carbon-critical)));
+    --gradient-glow: linear-gradient(180deg, hsl(var(--carbon-low) / 0.3), transparent);
+
+    /* Shadows */
+    --shadow-glow-green: 0 0 30px hsl(var(--carbon-low) / 0.4);
+    --shadow-glow-yellow: 0 0 20px hsl(var(--carbon-mid) / 0.3);
+    --shadow-glow-red: 0 0 25px hsl(var(--carbon-critical) / 0.4);
+
+    /* Sidebar - keeping for compatibility */
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 145 100% 45%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 145 100% 45%;
+  }
+
+  .dark {
+    --background: 0 0% 13%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 145 100% 45%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 51 100% 50%;
+    --secondary-foreground: 0 0% 5%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 351 100% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 351 100% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 145 100% 45%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 145 100% 45%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 145 100% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Orbitron', sans-serif;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Panel */
+  .glass-panel {
+    @apply bg-card/80 backdrop-blur-xl border border-border/30 rounded-xl;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Cyber Glow Text */
+  .cyber-text {
+    background: linear-gradient(90deg, hsl(var(--carbon-low)), hsl(var(--carbon-mid)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Heat Legend Bar */
+  .heat-bar {
+    background: linear-gradient(90deg, hsl(var(--carbon-low)), hsl(var(--carbon-mid)), hsl(var(--carbon-critical)));
+  }
+
+  /* Glow Effects */
+  .glow-green {
+    box-shadow: var(--shadow-glow-green);
+  }
+
+  .glow-yellow {
+    box-shadow: var(--shadow-glow-yellow);
+  }
+
+  .glow-red {
+    box-shadow: var(--shadow-glow-red);
+  }
+
+  /* Pulse Animation */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* Slider Track Styling */
+  .cyber-slider {
+    @apply relative w-full h-2 rounded-full;
+    background: linear-gradient(90deg, 
+      hsl(var(--carbon-low)) 0%, 
+      hsl(var(--carbon-mid)) 50%, 
+      hsl(var(--carbon-critical)) 100%
+    );
+  }
+
+  /* Scan Line Effect */
+  .scanlines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+    pointer-events: none;
+    opacity: 0.3;
+  }
+}
+
+@layer utilities {
+  /* Animation Keyframes */
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    50% {
+      opacity: 0.8;
+      filter: brightness(1.2);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes countUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.5s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-count-up {
+    animation: countUp 0.4s ease-out forwards;
+  }
+}
+
+/* MapLibre Popup Customization */
+.maplibregl-popup-content {
+  background: hsl(0 0% 6% / 0.95) !important;
+  color: hsl(0 0% 95%) !important;
+  border: 1px solid hsl(0 0% 30%) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: hsl(0 0% 6% / 0.95) !important;
+}
+
+.maplibregl-popup-close-button {
+  color: hsl(0 0% 60%) !important;
+  font-size: 20px !important;
+  padding: 4px 8px !important;
+}
+
+.maplibregl-popup-close-button:hover {
+  color: hsl(0 0% 95%) !important;
+  background: transparent !important;
+}
+
+/* MapLibre Controls */
+.maplibregl-ctrl-group {
+  background: hsl(0 0% 8% / 0.9) !important;
+  border: 1px solid hsl(0 0% 25%) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.maplibregl-ctrl-group button {
+  background: transparent !important;
+  border-bottom-color: hsl(0 0% 25%) !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background: hsl(0 0% 15%) !important;
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1) !important;
+}

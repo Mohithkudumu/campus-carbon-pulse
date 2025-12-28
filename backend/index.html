@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Campus Twin | Light Mode Live</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #f0f2f5; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+        /* Dashboard UI (Light Mode) */
+        .dashboard {
+            position: absolute; top: 20px; left: 20px; width: 260px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.1); border-radius: 12px;
+            padding: 20px; color: #1a1a1a; z-index: 10; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .dashboard h1 {
+            font-size: 18px; margin: 0 0 5px 0; font-weight: 800;
+            color: #2ecc71; 
+        }
+        .dashboard p { font-size: 11px; color: #666; margin: 0 0 15px 0; }
+        .legend-bar {
+            height: 6px; width: 100%; margin-bottom: 8px; border-radius: 3px;
+            background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
+        }
+        .legend-labels { display: flex; justify-content: space-between; font-size: 10px; color: #999; }
+
+        /* Popup Styling (Light Mode) */
+        .maplibregl-popup-content {
+            background: #ffffff !important; color: #333; border: none;
+            border-radius: 10px; padding: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .popup-header { color: #2ecc71; font-weight: 800; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; text-transform: capitalize; }
+        .popup-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+        .popup-row span { color: #777; }
+        .popup-row b { color: #333; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="dashboard">
+    <h1>CAMPUS LIVE</h1>
+    <p>Environmental Digital Twin</p>
+    <div class="legend-bar"></div>
+    <div class="legend-labels"><span>Safe</span><span>Warning</span><span>Alert</span></div>
+</div>
+
+<script>
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', // Light Basemap
+        center: [80.198, 12.751],
+        zoom: 17.2,
+        pitch: 60, 
+        bearing: -17 
+    });
+
+    map.on('load', () => {
+        // --- 1. SETUP LABEL BACKGROUND ---
+        const width = 120, height = 40;
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height + 8;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'rgba(30, 30, 30, 0.9)'; // Dark label for contrast on light map
+        ctx.beginPath(); ctx.roundRect(0, 0, width, height, 8); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(width/2-8, height); ctx.lineTo(width/2+8, height); ctx.lineTo(width/2, height+8); ctx.fill();
+        const imageData = ctx.getImageData(0, 0, width, height + 8);
+        map.addImage('label-bg', imageData, { 
+            content: [12, 10, width-12, height-10], 
+            stretchX: [[12, width-12]], stretchY: [[10, height-10]] 
+        });
+
+        // --- 2. SOURCE ---
+        map.addSource('campus-buildings', {
+            type: 'geojson',
+            data: 'campus.json' // Updated by FastAPI
+        });
+
+        // --- 3. 3D EXTRUSION (Using standardized 'height' and 'heatLevel') ---
+        map.addLayer({
+            'id': '3d-buildings',
+            'source': 'campus-buildings',
+            'type': 'fill-extrusion',
+            'paint': {
+                'fill-extrusion-height': ['get', 'height'],
+                'fill-extrusion-base': 0,
+                'fill-extrusion-color': [
+                    'interpolate', ['linear'], ['get', 'heatLevel'],
+                    0, '#2ecc71', 50, '#f1c40f', 100, '#e74c3c'
+                ],
+                'fill-extrusion-opacity': 0.8
+            }
+        });
+
+        // --- 4. DYNAMIC LABELS ---
+        map.addLayer({
+            'id': 'building-labels',
+            'type': 'symbol',
+            'source': 'campus-buildings',
+            'layout': {
+                'text-field': ['get', 'name'],
+                'text-size': 11,
+                'icon-image': 'label-bg',
+                'icon-text-fit': 'both',
+                'text-anchor': 'bottom',
+                'icon-anchor': 'bottom',
+                'text-offset': [
+                    'step',
+                    ['to-number', ['get', 'height']],
+                    ['literal', [0, -0.6]], 
+                    20, ['literal', [0, -1.5]], 
+                    35, ['literal', [0, -2.5]]
+                ]
+            },
+            'paint': { 'text-color': '#FFFFFF' }
+        });
+
+        // --- 5. CLICK POPUPS ---
+        map.on('click', '3d-buildings', (e) => {
+            const props = e.features[0].properties;
+            
+            // Clean up name formatting (replace underscores with spaces)
+            const displayName = (props.name || "Building").replace(/_/g, ' ');
+
+            new maplibregl.Popup({ offset: 10, closeButton: false })
+                .setLngLat(e.lngLat)
+                .setHTML(`
+                    <div class="popup-header">${displayName}</div>
+                    <div class="popup-row"><span>Heat Index</span> <b>${props.heatLevel || 0}%</b></div>
+                    <div class="popup-row"><span>Carbon Footprint</span> <b>${props.carbon || 0}</b></div>
+                    <div class="popup-row"><span>Height</span> <b>${props.height || 0}m</b></div>
+                `)
+                .addTo(map);
+        });
+
+        // Cursor change on hover
+        map.on('mouseenter', '3d-buildings', () => map.getCanvas().style.cursor = 'pointer');
+        map.on('mouseleave', '3d-buildings', () => map.getCanvas().style.cursor = '');
+    });
+</script>
+</body>
+</html>
