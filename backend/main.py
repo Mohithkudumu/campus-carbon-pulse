@@ -169,7 +169,7 @@ async def get_historical_data(days: int):
     if not (1 <= days <= 365):
         raise HTTPException(status_code=400, detail="Days must be between 1 and 365")
     
-    csv_file = "snuc_carbon_year_2025_cleaned.csv"
+    csv_file = "snuc_carbon_year_2025.csv"
     if not os.path.exists(csv_file):
         raise HTTPException(status_code=404, detail="Historical data file not found")
     
