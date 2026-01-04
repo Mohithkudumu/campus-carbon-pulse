@@ -5,3 +5,4 @@ tensorflow
 joblib
 numpy
 google-genai
+scikit-learn
