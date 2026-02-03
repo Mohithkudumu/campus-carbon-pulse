@@ -6,6 +6,9 @@ from datetime import datetime
 import os
 from google import genai
 from forecast import generate_24h_forecast_json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -269,10 +272,19 @@ async def get_insights():
         }
         
         # Get API key from environment variable
-        api_key = os.getenv('GEMINI_API_KEY', '#replace here with ur gemeini api key')
+       api_key = os.getenv("GEMINI_API_KEY")
+
+        if not api_key:
+            raise HTTPException(
+                status_code=500,
+                detail="GEMINI_API_KEY is not set in environment variables"
+            )
+
         
         # Initialize Gemini client
-        client = genai.Client(api_key=api_key)
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-2.5-flash")
+
         
         # Create enhanced prompt requesting JSON output
         prompt = f"""You are analyzing carbon emissions data for a university campus with {summary['building_count']} buildings.
@@ -343,10 +355,7 @@ REQUIREMENTS:
 - Focus on practical, implementable solutions for a university campus
 - Return ONLY valid JSON, no markdown formatting or code blocks"""
         
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
+        response = model.generate_content(prompt)
         
         # Parse the JSON response
         response_text = response.text.strip()
