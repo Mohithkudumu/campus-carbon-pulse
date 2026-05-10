@@ -27,13 +27,13 @@ def generate_24h_forecast_json():
     now = datetime.now()
     current_hour = now.replace(minute=0, second=0, microsecond=0)
     
-    print(f"🕐 Current time: {now}")
-    print(f"📍 Rounded to: {current_hour}")
+    print(f"Current time: {now}")
+    print(f"Rounded to: {current_hour}")
     
     # Calculate the time window we need (last 168 hours ending at current time)
     start_time = current_hour - pd.Timedelta(hours=SEQ_LEN)
     
-    print(f"📊 Using data from {start_time} to {current_hour}")
+    print(f"Using data from {start_time} to {current_hour}")
 
     forecast_output = {}
 
@@ -59,7 +59,7 @@ def generate_24h_forecast_json():
         
         # Get the last 168 data points
         if len(building_df) < SEQ_LEN:
-            print(f"⚠️  Warning: Not enough data for {building_id}. Need {SEQ_LEN}, have {len(building_df)}")
+            print(f"Warning: Not enough data for {building_id}. Need {SEQ_LEN}, have {len(building_df)}")
             continue
             
         series = building_df["Total_CO2e_kg"].values[-SEQ_LEN:].reshape(-1, 1)
@@ -84,14 +84,14 @@ def generate_24h_forecast_json():
             history[0, -1, 0] = pred_scaled
 
         forecast_output[building_id] = building_forecast
-        print(f"✅ Forecasted {building_id}: {hour} hours ahead")
+        print(f"Forecasted {building_id}: {hour} hours ahead")
 
     # Save JSON
     with open(OUTPUT_JSON, "w") as f:
         json.dump(forecast_output, f, indent=4)
 
-    print(f"\n✅ Forecast saved to {OUTPUT_JSON}")
-    print(f"📅 Forecast period: {current_hour + pd.Timedelta(hours=1)} to {current_hour + pd.Timedelta(hours=24)}")
+    print(f"\nForecast saved to {OUTPUT_JSON}")
+    print(f"Forecast period: {current_hour + pd.Timedelta(hours=1)} to {current_hour + pd.Timedelta(hours=24)}")
     return forecast_output
 
 if __name__ == "__main__":

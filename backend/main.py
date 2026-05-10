@@ -4,8 +4,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import os
+from dotenv import load_dotenv
 from google import genai
 from forecast import generate_24h_forecast_json
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI()
 
@@ -13,21 +17,21 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup_event():
     print("\n" + "="*60)
-    print("🚀 Starting Campus Carbon Pulse Backend...")
+    print("Starting Campus Carbon Pulse Backend...")
     print("="*60)
-    print("\n📊 Generating fresh forecasts aligned with current time...")
+    print("\nGenerating fresh forecasts aligned with current time...")
     try:
         generate_24h_forecast_json()
-        print("\n✅ Forecasts generated successfully!")
-        print("🌐 Backend ready to serve requests.\n")
+        print("\nForecasts generated successfully!")
+        print("Backend ready to serve requests.\n")
     except Exception as e:
-        print(f"\n⚠️  Warning: Failed to generate forecasts: {e}")
+        print(f"\nWarning: Failed to generate forecasts: {e}")
         print("Backend will use existing emissions.json if available.\n")
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8081", "http://127.0.0.1:8081"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,7 +39,7 @@ app.add_middleware(
 
 EMISSIONS_FILE = "emissions.json"
 # Point to the public folder in the parent directory so the frontend works with the updated file if we still rely on file updates
-GEOJSON_FILE = "../public/campus.json"
+GEOJSON_FILE = "campus.json"
 
 # Load the model output once when the server starts
 def load_data():
@@ -107,7 +111,7 @@ def update_geojson_file(results):
     with open(GEOJSON_FILE, "w") as f:
         json.dump(geojson_data, f, indent=4)
     
-    print(f"✅ Success: {updated_count} buildings updated with live data and fixed heights.")
+    print(f"Success: {updated_count} buildings updated with live data and fixed heights.")
 
 @app.get("/get-emissions/{target_hour}")
 async def get_emissions(target_hour: int):
@@ -169,7 +173,7 @@ async def get_historical_data(days: int):
     if not (1 <= days <= 365):
         raise HTTPException(status_code=400, detail="Days must be between 1 and 365")
     
-    csv_file = "snuc_carbon_year_2025_cleaned.csv"
+    csv_file = "snuc_carbon_year_2025.csv"
     if not os.path.exists(csv_file):
         raise HTTPException(status_code=404, detail="Historical data file not found")
     
@@ -269,7 +273,12 @@ async def get_insights():
         }
         
         # Get API key from environment variable
-        api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyB2Mqr2VxVvFEFVWqezJHew5BLVIeq1NqA')
+        api_key = os.getenv('GEMINI_API_KEY')
+        if not api_key:
+            raise HTTPException(
+                status_code=500,
+                detail="GEMINI_API_KEY not configured. Please set up your .env file with a valid API key. Get one from: https://aistudio.google.com/app/apikey"
+            )
         
         # Initialize Gemini client
         client = genai.Client(api_key=api_key)
@@ -344,7 +353,7 @@ REQUIREMENTS:
 - Return ONLY valid JSON, no markdown formatting or code blocks"""
         
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-1.5-flash",
             contents=prompt
         )
         
