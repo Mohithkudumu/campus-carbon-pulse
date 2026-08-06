@@ -9,6 +9,7 @@ from google import genai
 from forecast import generate_24h_forecast_json
 
 # Load environment variables from .env file
+# Triggering reload
 load_dotenv()
 
 app = FastAPI()

@@ -6,8 +6,8 @@
             "properties": {
                 "name": "Large_Hostel_Boys",
                 "height": 35,
-                "heatLevel": 37.26,
-                "carbon": 56.47
+                "heatLevel": 67.24,
+                "carbon": 104.37
             },
             "geometry": {
                 "coordinates": [
@@ -107,8 +107,8 @@
             "properties": {
                 "name": "Large_Hostel_Boys",
                 "height": 35,
-                "heatLevel": 37.26,
-                "carbon": 56.47
+                "heatLevel": 67.24,
+                "carbon": 104.37
             },
             "geometry": {
                 "coordinates": [
@@ -204,8 +204,8 @@
             "properties": {
                 "name": "Boys_Mess",
                 "height": 15,
-                "heatLevel": 26.31,
-                "carbon": 38.96
+                "heatLevel": 16.72,
+                "carbon": 23.64
             },
             "geometry": {
                 "coordinates": [
@@ -285,8 +285,8 @@
             "properties": {
                 "name": "Large_Hostel_Boys",
                 "height": 35,
-                "heatLevel": 37.26,
-                "carbon": 56.47
+                "heatLevel": 67.24,
+                "carbon": 104.37
             },
             "geometry": {
                 "coordinates": [
@@ -478,8 +478,8 @@
             "properties": {
                 "name": "Large_Hostel_Boys",
                 "height": 35,
-                "heatLevel": 37.26,
-                "carbon": 56.47
+                "heatLevel": 67.24,
+                "carbon": 104.37
             },
             "geometry": {
                 "coordinates": [
@@ -583,8 +583,8 @@
             "properties": {
                 "name": "Large_Hostel_Boys",
                 "height": 35,
-                "heatLevel": 37.26,
-                "carbon": 56.47
+                "heatLevel": 67.24,
+                "carbon": 104.37
             },
             "geometry": {
                 "coordinates": [
@@ -640,8 +640,8 @@
             "properties": {
                 "name": "Academic_Block_Large",
                 "height": 25,
-                "heatLevel": 65.95,
-                "carbon": 102.31
+                "heatLevel": 71.24,
+                "carbon": 110.77
             },
             "geometry": {
                 "coordinates": [
@@ -729,8 +729,8 @@
             "properties": {
                 "name": "Academic_Block_Large",
                 "height": 25,
-                "heatLevel": 65.95,
-                "carbon": 102.31
+                "heatLevel": 71.24,
+                "carbon": 110.77
             },
             "geometry": {
                 "coordinates": [
@@ -806,8 +806,8 @@
             "properties": {
                 "name": "Small_Hostel_Boys",
                 "height": 25,
-                "heatLevel": 4.39,
-                "carbon": 3.93
+                "heatLevel": 4.86,
+                "carbon": 4.68
             },
             "geometry": {
                 "coordinates": [
@@ -891,8 +891,8 @@
             "properties": {
                 "name": "Boys_Mess",
                 "height": 15,
-                "heatLevel": 26.31,
-                "carbon": 38.96
+                "heatLevel": 16.72,
+                "carbon": 23.64
             },
             "geometry": {
                 "coordinates": [
@@ -964,8 +964,8 @@
             "properties": {
                 "name": "Academic_Block_Small",
                 "height": 20,
-                "heatLevel": 15.12,
-                "carbon": 21.08
+                "heatLevel": 15.29,
+                "carbon": 21.35
             },
             "geometry": {
                 "coordinates": [
@@ -1053,8 +1053,8 @@
             "properties": {
                 "name": "Academic_Block_Large",
                 "height": 25,
-                "heatLevel": 65.95,
-                "carbon": 102.31
+                "heatLevel": 71.24,
+                "carbon": 110.77
             },
             "geometry": {
                 "coordinates": [
@@ -1106,8 +1106,8 @@
             "properties": {
                 "name": "Academic_Block_Large",
                 "height": 25,
-                "heatLevel": 65.95,
-                "carbon": 102.31
+                "heatLevel": 71.24,
+                "carbon": 110.77
             },
             "geometry": {
                 "coordinates": [
@@ -1159,8 +1159,8 @@
             "properties": {
                 "name": "Large_Hostel_Girls",
                 "Hieght": 60,
-                "heatLevel": 25.36,
-                "carbon": 37.45,
+                "heatLevel": 26.64,
+                "carbon": 39.5,
                 "height": 35
             },
             "geometry": {
@@ -1261,8 +1261,8 @@
             "properties": {
                 "name": "Large_Hostel_Girls",
                 "height ": 60,
-                "heatLevel": 25.36,
-                "carbon": 37.45,
+                "heatLevel": 26.64,
+                "carbon": 39.5,
                 "height": 35
             },
             "geometry": {
@@ -1315,8 +1315,8 @@
             "properties": {
                 "name": "Small_Hostel_Girls",
                 "height": 25,
-                "heatLevel": 0.0,
-                "carbon": -3.08
+                "heatLevel": 3.31,
+                "carbon": 2.21
             },
             "geometry": {
                 "coordinates": [
@@ -1589,8 +1589,8 @@
             "properties": {
                 "name": "Small_Hostel_Girls",
                 "height": 25,
-                "heatLevel": 0.0,
-                "carbon": -3.08
+                "heatLevel": 3.31,
+                "carbon": 2.21
             },
             "geometry": {
                 "coordinates": [
@@ -1682,8 +1682,8 @@
             "properties": {
                 "name": "Girls_Mess",
                 "height": 15,
-                "heatLevel": 27.9,
-                "carbon": 41.5
+                "heatLevel": 16.86,
+                "carbon": 23.87
             },
             "geometry": {
                 "coordinates": [
@@ -1751,8 +1751,8 @@
             "properties": {
                 "name": "Large_Hostel_Girls",
                 "height": 35,
-                "heatLevel": 25.36,
-                "carbon": 37.45
+                "heatLevel": 26.64,
+                "carbon": 39.5
             },
             "geometry": {
                 "coordinates": [
@@ -1852,8 +1852,8 @@
             "properties": {
                 "name": "Small_Hostel_Girls",
                 "height": 25,
-                "heatLevel": 0.0,
-                "carbon": -3.08
+                "heatLevel": 3.31,
+                "carbon": 2.21
             },
             "geometry": {
                 "coordinates": [
@@ -1897,8 +1897,8 @@
             "properties": {
                 "name": "Canteen",
                 "height": 12,
-                "heatLevel": 20.89,
-                "carbon": 30.3
+                "heatLevel": 15.49,
+                "carbon": 21.68
             },
             "geometry": {
                 "coordinates": [
@@ -1962,8 +1962,8 @@
             "properties": {
                 "name": "Sports_Complex",
                 "height": 18,
-                "heatLevel": 0.43,
-                "carbon": -2.4
+                "heatLevel": 1.6,
+                "carbon": -0.53
             },
             "geometry": {
                 "coordinates": [
@@ -2031,8 +2031,8 @@
             "properties": {
                 "name": "Academic_Block_Small",
                 "height": 20,
-                "heatLevel": 15.12,
-                "carbon": 21.08
+                "heatLevel": 15.29,
+                "carbon": 21.35
             },
             "geometry": {
                 "coordinates": [
@@ -2097,8 +2097,8 @@
                 "name": "Academic_Block_Large",
                 "height": 25,
                 "heightLevel": 0,
-                "carbon": 102.31,
-                "heatLevel": 65.95
+                "carbon": 110.77,
+                "heatLevel": 71.24
             },
             "geometry": {
                 "coordinates": [
@@ -2150,8 +2150,8 @@
             "properties": {
                 "name": "Library",
                 "height": 22,
-                "heatLevel": 17.24,
-                "carbon": 24.47
+                "heatLevel": 21.11,
+                "carbon": 30.65
             },
             "geometry": {
                 "coordinates": [
@@ -2195,8 +2195,8 @@
             "properties": {
                 "name": "Academic_Block_Large",
                 "height": 25,
-                "heatLevel": 65.95,
-                "carbon": 102.31
+                "heatLevel": 71.24,
+                "carbon": 110.77
             },
             "geometry": {
                 "coordinates": [
@@ -3376,8 +3376,8 @@
             "properties": {
                 "name": "Clinic",
                 "height": 12,
-                "heatLevel": 0.39,
-                "carbon": -2.46
+                "heatLevel": 1.78,
+                "carbon": -0.23
             },
             "geometry": {
                 "coordinates": [
@@ -3413,8 +3413,8 @@
             "properties": {
                 "name": "Small_Hostel_Boys",
                 "height": 25,
-                "heatLevel": 4.39,
-                "carbon": 3.93
+                "heatLevel": 4.86,
+                "carbon": 4.68
             },
             "geometry": {
                 "coordinates": [
@@ -3450,8 +3450,8 @@
             "properties": {
                 "name": "Small_Hostel_Boys",
                 "height": 25,
-                "heatLevel": 4.39,
-                "carbon": 3.93
+                "heatLevel": 4.86,
+                "carbon": 4.68
             },
             "geometry": {
                 "coordinates": [
@@ -3551,8 +3551,8 @@
             "properties": {
                 "name": "Academic_Block_Small",
                 "height": 20,
-                "heatLevel": 15.12,
-                "carbon": 21.08
+                "heatLevel": 15.29,
+                "carbon": 21.35
             },
             "geometry": {
                 "coordinates": [
@@ -3664,8 +3664,8 @@
             "properties": {
                 "name": "Canteen",
                 "height": 12,
-                "heatLevel": 20.89,
-                "carbon": 30.3
+                "heatLevel": 15.49,
+                "carbon": 21.68
             },
             "geometry": {
                 "coordinates": [

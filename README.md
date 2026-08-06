@@ -75,7 +75,7 @@ venv\Scripts\activate
 source venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
+x`
 
 # Start FastAPI server (runs on http://localhost:8000)
 python -m uvicorn main:app --reload --port 8000
