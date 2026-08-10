@@ -5,6 +5,6 @@ pandas
 numpy
 scikit-learn
 joblib
-python-dotenv
 google-genai
 python-multipart
+python-dotenv

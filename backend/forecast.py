@@ -1,3 +1,6 @@
+#predicts for next 24hrs emmisions from all the buildings.
+
+import sys
 import os
 import json
 import numpy as np
@@ -5,6 +8,12 @@ import pandas as pd
 import joblib
 from tensorflow.keras.models import load_model
 from datetime import datetime
+
+# Configure UTF-8 encoding for standard output and error to prevent UnicodeEncodeError on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
 
 SEQ_LEN = 168  # 7 days * 24 hours
 MODEL_DIR = "models"
@@ -18,6 +27,12 @@ def generate_24h_forecast_json():
     2. Use last 168 hours from CSV as input (ending at current time)
     3. Forecast next 24 hours with real timestamps
     """
+    # Force UTF-8 encoding on standard streams to prevent UnicodeEncodeError in Windows CMD/PowerShell
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
+
     # Load historical data
     df = pd.read_csv(DATA_PATH)
     df["Timestamp"] = pd.to_datetime(df["Timestamp"])

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Loader2, AlertCircle, Clock, Building2, TrendingUp, Lightbulb } from 'lucide-react';
 import InsightCard from '@/components/InsightCard';
@@ -35,14 +35,15 @@ const Insights = () => {
     try {
       const response = await fetch('http://localhost:8000/get-insights');
       if (!response.ok) {
-        throw new Error('Failed to generate insights');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to generate insights');
       }
 
       const data = await response.json();
       setInsights(data.insights);
       setHasGenerated(true);
-    } catch (err) {
-      setError('Failed to generate insights. Please ensure the backend is running and try again.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate insights. Please ensure the backend is running and try again.');
       console.error('Error generating insights:', err);
     } finally {
       setIsLoading(false);

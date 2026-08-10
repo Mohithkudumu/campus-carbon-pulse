@@ -1,3 +1,4 @@
+import sys
 import json
 import pandas as pd
 from fastapi import FastAPI, HTTPException
@@ -7,6 +8,15 @@ import os
 from dotenv import load_dotenv
 from google import genai
 from forecast import generate_24h_forecast_json
+from dotenv import load_dotenv, find_dotenv
+
+# Configure UTF-8 encoding for standard output and error to prevent UnicodeEncodeError on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
+load_dotenv()
 
 # Load environment variables from .env file
 # Triggering reload
@@ -17,6 +27,12 @@ app = FastAPI()
 # Auto-generate forecasts on startup
 @app.on_event("startup")
 async def startup_event():
+    # Force UTF-8 encoding on standard streams to prevent UnicodeEncodeError in Windows CMD/PowerShell
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
+
     print("\n" + "="*60)
     print("Starting Campus Carbon Pulse Backend...")
     print("="*60)
@@ -56,6 +72,12 @@ def update_geojson_file(results):
     Injects API results and standardized heights into the GeoJSON file.
     Ensures compatibility with the index.html (lowercase keys).
     """
+    # Force UTF-8 encoding on standard streams to prevent UnicodeEncodeError in Windows CMD/PowerShell
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
+
     if not os.path.exists(GEOJSON_FILE):
         print(f"Warning: {GEOJSON_FILE} not found. Skipping GeoJSON update.")
         return
@@ -274,15 +296,18 @@ async def get_insights():
         }
         
         # Get API key from environment variable
-        api_key = os.getenv('GEMINI_API_KEY')
+        api_key = os.getenv("GEMINI_API_KEY")
+
         if not api_key:
             raise HTTPException(
                 status_code=500,
-                detail="GEMINI_API_KEY not configured. Please set up your .env file with a valid API key. Get one from: https://aistudio.google.com/app/apikey"
+                detail="GEMINI_API_KEY is not set in environment variables"
             )
+
         
         # Initialize Gemini client
         client = genai.Client(api_key=api_key)
+
         
         # Create enhanced prompt requesting JSON output
         prompt = f"""You are analyzing carbon emissions data for a university campus with {summary['building_count']} buildings.
@@ -354,8 +379,8 @@ REQUIREMENTS:
 - Return ONLY valid JSON, no markdown formatting or code blocks"""
         
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt
+            model="gemini-2.5-flash",
+            contents=prompt,
         )
         
         # Parse the JSON response
