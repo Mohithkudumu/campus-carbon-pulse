@@ -12,6 +12,7 @@ import { Activity, Leaf, TrendingUp, TrendingDown, Building2, Clock } from 'luci
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { generateHistoricalData, formatCarbon, getCarbonLevel } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
+import AlertsBell from './AlertsBell';
 
 interface AnalyticsPanelProps {
   totalCarbon: number;
@@ -75,17 +76,20 @@ const AnalyticsPanel = ({ totalCarbon, buildingCount, currentHour }: AnalyticsPa
 
   return (
     <div className="glass-panel p-5 w-80 space-y-5 animate-slide-in">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-          <Activity className="w-4 h-4 text-primary" />
+      {/* Header with alerts bell inline */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <Activity className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="font-display text-sm font-bold tracking-wider">
+              CARBON ANALYTICS
+            </h2>
+            <p className="text-[10px] text-muted-foreground">Real-time monitoring</p>
+          </div>
         </div>
-        <div>
-          <h2 className="font-display text-sm font-bold tracking-wider">
-            CARBON ANALYTICS
-          </h2>
-          <p className="text-[10px] text-muted-foreground">Real-time monitoring</p>
-        </div>
+        <AlertsBell />
       </div>
 
       {/* Main Metric */}

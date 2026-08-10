@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from google import genai
 from forecast import generate_24h_forecast_json
 from dotenv import load_dotenv, find_dotenv
+from database import get_db_connection, init_db
 
 # Configure UTF-8 encoding for standard output and error to prevent UnicodeEncodeError on Windows
 if hasattr(sys.stdout, 'reconfigure'):
@@ -24,6 +25,53 @@ load_dotenv()
 
 app = FastAPI()
 
+def save_forecasts_to_db(forecast_data):
+    """
+    Saves the dictionary structure of predictions into the SQLite database
+    and raises carbon alerts/warnings if critical thresholds are met.
+    """
+    if not forecast_data:
+        return
+    
+    # Calculate global min/max across all predictions to scale them consistently [0-100]
+    all_vals = []
+    for building_emissions in forecast_data.values():
+        all_vals.extend(building_emissions.values())
+        
+    global_min = min(all_vals) if all_vals else 0
+    global_max = max(all_vals) if all_vals else 1
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Standard warning threshold limit
+    limit_value = 120.0
+    
+    for building_id, timestamps in forecast_data.items():
+        for ts_str, emission_val in timestamps.items():
+            scaled = 0.0
+            if global_max != global_min:
+                scaled = ((emission_val - global_min) / (global_max - global_min)) * 100
+            
+            # Save into predicted_emissions
+            cursor.execute('''
+                INSERT OR REPLACE INTO predicted_emissions (building_id, timestamp, emission, scaled_emission)
+                VALUES (?, ?, ?, ?)
+            ''', (building_id, ts_str, round(emission_val, 2), round(scaled, 2)))
+            
+            # If emission exceeds safety threshold
+            if emission_val > limit_value or scaled > 85.0:
+                severity = "CRITICAL" if emission_val > 150.0 or scaled > 95.0 else "HIGH"
+                alert_msg = f"Building {building_id} predicted to hit carbon peak of {emission_val:.2f} kg CO2e (scaled {scaled:.1f}%)."
+                cursor.execute('''
+                    INSERT OR REPLACE INTO peak_alerts (building_id, timestamp, emission, limit_value, alert_msg, severity, resolved)
+                    VALUES (?, ?, ?, ?, ?, ?, 0)
+                ''', (building_id, ts_str, round(emission_val, 2), limit_value, alert_msg, severity))
+                
+    conn.commit()
+    conn.close()
+    print("Forecast data and alert states persisted to SQLite Database.")
+
 # Auto-generate forecasts on startup
 @app.on_event("startup")
 async def startup_event():
@@ -36,14 +84,31 @@ async def startup_event():
     print("\n" + "="*60)
     print("Starting Campus Carbon Pulse Backend...")
     print("="*60)
+    
+    # Initialize SQLite Database tables
+    try:
+        init_db()
+        print("SQLite Database initialized (database.db)")
+    except Exception as e:
+        print(f"Error initializing SQLite DB: {e}")
+
     print("\nGenerating fresh forecasts aligned with current time...")
     try:
-        generate_24h_forecast_json()
+        forecast_output = generate_24h_forecast_json()
         print("\nForecasts generated successfully!")
+        save_forecasts_to_db(forecast_output)
         print("Backend ready to serve requests.\n")
     except Exception as e:
         print(f"\nWarning: Failed to generate forecasts: {e}")
-        print("Backend will use existing emissions.json if available.\n")
+        # fallback to emissions.json if it exists
+        if os.path.exists(EMISSIONS_FILE):
+            try:
+                with open(EMISSIONS_FILE, "r") as f:
+                    forecast_output = json.load(f)
+                save_forecasts_to_db(forecast_output)
+                print("Backend loaded fallback emissions.json and setup DB successfully.\n")
+            except Exception as fe:
+                print(f"Failed to load fallback emissions.json: {fe}")
 
 
 app.add_middleware(
@@ -141,50 +206,68 @@ async def get_emissions(target_hour: int):
     if not (0 <= target_hour <= 23):
         raise HTTPException(status_code=400, detail="Hour must be between 0 and 23")
 
-    extracted_results = []
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM predicted_emissions")
+    rows = cursor.fetchall()
+    conn.close()
 
-    for building_id, timestamps in EMISSIONS_DATA.items():
-        for ts_str, value in timestamps.items():
-            dt_obj = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S")
+    extracted_results = []
+    for row in rows:
+        try:
+            dt_obj = datetime.strptime(row['timestamp'], "%Y-%m-%d %H:%M:%S")
             if dt_obj.hour == target_hour:
                 extracted_results.append({
-                    "building_id": building_id,
-                    "total_emission": value
+                    "building_id": row['building_id'],
+                    "total_emission": row['emission'],
+                    "scaled_emission": row['scaled_emission']
                 })
-                break
+        except Exception:
+            continue
 
     if not extracted_results:
-        raise HTTPException(status_code=404, detail="No data found for this hour")
+        # Fallback to local file memory if DB query returned nothing
+        extracted_results = []
+        for building_id, timestamps in EMISSIONS_DATA.items():
+            for ts_str, value in timestamps.items():
+                dt_obj = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S")
+                if dt_obj.hour == target_hour:
+                    extracted_results.append({
+                        "building_id": building_id,
+                        "total_emission": value
+                    })
+                    break
 
-    df = pd.DataFrame(extracted_results)
-    
-    # Calculate global min/max across ALL hours and buildings for consistent color scaling
-    all_emissions = []
-    for timestamps in EMISSIONS_DATA.values():
-        all_emissions.extend(timestamps.values())
-    
-    global_min = min(all_emissions)
-    global_max = max(all_emissions)
-    
-    if global_max == global_min:
-        df['scaled_emission'] = 0.0
-    else:
-        df['scaled_emission'] = ((df['total_emission'] - global_min) / (global_max - global_min)) * 100
+        if not extracted_results:
+            raise HTTPException(status_code=404, detail="No data found for this hour")
 
-    final_output = []
-    for _, row in df.iterrows():
-        final_output.append({
-            "building_id": row['building_id'],
-            "total_emission": round(row['total_emission'], 2),
-            "scaled_emission": round(row['scaled_emission'], 2)
-        })
+        df = pd.DataFrame(extracted_results)
+        all_emissions = []
+        for timestamps in EMISSIONS_DATA.values():
+            all_emissions.extend(timestamps.values())
+        global_min = min(all_emissions) if all_emissions else 0
+        global_max = max(all_emissions) if all_emissions else 1
+        
+        if global_max == global_min:
+            df['scaled_emission'] = 0.0
+        else:
+            df['scaled_emission'] = ((df['total_emission'] - global_min) / (global_max - global_min)) * 100
+
+        final_output = []
+        for _, row in df.iterrows():
+            final_output.append({
+                "building_id": row['building_id'],
+                "total_emission": round(row['total_emission'], 2),
+                "scaled_emission": round(row['scaled_emission'], 2)
+            })
+        extracted_results = final_output
 
     # Trigger automation
-    update_geojson_file(final_output)
+    update_geojson_file(extracted_results)
 
     return {
         "hour": target_hour,
-        "results": final_output
+        "results": extracted_results
     }
 
 @app.get("/get-historical-data/{days}")
@@ -239,10 +322,30 @@ async def get_historical_data(days: int):
 async def get_insights():
     """
     Generates AI insights from emissions data using Google Gemini API.
-    Returns structured JSON with categorized insights.
+    Uses SQLite database as a cache to prevent duplicate Gemini API billing calls.
     """
+    # SQLite caching lookup
+    date_key = datetime.now().strftime("%Y-%m-%d")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT insights_json FROM cached_insights WHERE date_key = ?", (date_key,))
+        row = cursor.fetchone()
+        if row:
+            conn.close()
+            print("Serving AI insights from SQLite cache")
+            return {
+                "success": True,
+                "insights": json.loads(row['insights_json']),
+                "cached": True
+            }
+    except Exception as dbe:
+        print(f"Database cache check failed: {dbe}")
+
     # Check if emissions file exists
     if not os.path.exists(EMISSIONS_FILE):
+        if conn:
+            conn.close()
         raise HTTPException(status_code=404, detail="Emissions data file not found")
     
     try:
@@ -299,15 +402,15 @@ async def get_insights():
         api_key = os.getenv("GEMINI_API_KEY")
 
         if not api_key:
+            if conn:
+                conn.close()
             raise HTTPException(
                 status_code=500,
                 detail="GEMINI_API_KEY is not set in environment variables"
             )
 
-        
         # Initialize Gemini client
         client = genai.Client(api_key=api_key)
-
         
         # Create enhanced prompt requesting JSON output
         prompt = f"""You are analyzing carbon emissions data for a university campus with {summary['building_count']} buildings.
@@ -398,19 +501,61 @@ REQUIREMENTS:
         # Parse JSON
         insights_json = json.loads(response_text)
         
+        # Save cache to SQLite
+        try:
+            cursor.execute("INSERT OR REPLACE INTO cached_insights (date_key, insights_json) VALUES (?, ?)",
+                           (date_key, json.dumps(insights_json)))
+            conn.commit()
+        except Exception as dbe:
+            print(f"Failed to cache insights in DB: {dbe}")
+        finally:
+            conn.close()
+        
         return {
             "success": True,
-            "insights": insights_json
+            "insights": insights_json,
+            "cached": False
         }
         
     except json.JSONDecodeError as e:
+        if conn:
+            conn.close()
         raise HTTPException(
             status_code=500, 
             detail=f"Failed to parse AI response as JSON: {str(e)}"
         )
     except Exception as e:
+        if conn:
+            conn.close()
         raise HTTPException(
             status_code=500, 
             detail=f"Failed to generate insights: {str(e)}"
         )
+
+@app.get("/get-alerts")
+async def get_alerts():
+    """
+    Returns un-resolved system warning alerts for buildings with anomalous CO2 spikes.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM peak_alerts WHERE resolved = 0 ORDER BY timestamp DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+@app.post("/resolve-alert/{alert_id}")
+async def resolve_alert(alert_id: int):
+    """
+    Mark an active carbon alert as resolved.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE peak_alerts SET resolved = 1 WHERE id = ?", (alert_id,))
+    conn.commit()
+    rows = cursor.rowcount
+    conn.close()
+    if rows == 0:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return {"success": True, "message": f"Alert {alert_id} marked as resolved"}
 
